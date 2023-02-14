@@ -141,7 +141,7 @@ class Recommender(object):
         R_item = torch.zeros_like(self.model.item_mu_embeddings).type(torch.FloatTensor).to(self.config.device)
         M_item.requires_grad = False
         R_item.requires_grad = False
-
+        print("begin training")
         self.model.train()
         try:
             for t in range(self.config.epoch):
@@ -287,7 +287,7 @@ def main():
         data_set = MovieLens.ML20M()
     else:
         data_set = None
-
+    print("'data load over")
     rec = Recommender(data_set, config)
     rec.run()
 
