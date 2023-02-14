@@ -266,6 +266,8 @@ def main():
 
     # config the gpu device
     config.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print(torch.cuda.is_available())
+    print("config.device", config.device)
 
     # config if write the log to a file
     if config.is_logging is True:
