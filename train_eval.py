@@ -168,12 +168,18 @@ class Recommender(object):
                     user_emb_v = user_emb.view(-1, self.config.hidden_dim)
                     pos_emb_v = pos_emb.view(-1, self.config.hidden_dim)
                     neg_emb_v = neg_emb.view(-1, self.config.hidden_dim)
-                    print("user", user_emb_v[0:2])
-                    print("item", pos_emb_v[0:2])
+                    # print("user", user_emb_v[0:2])
+                    # print("item", pos_emb_v[0:2])
 
-                    Rui = torch.sum(user_emb_v*pos_emb_v, dim=1)
-                    Ruj = torch.sum(user_emb_v*neg_emb_v, dim=1)
-                    loss = self.bpr_loss(Rui, Ruj)
+                    # Rui = torch.sum(user_emb_v*pos_emb_v, dim=1)
+                    # Ruj = torch.sum(user_emb_v*neg_emb_v, dim=1)
+                    # loss = self.bpr_loss(Rui, Ruj)
+                    Rui = torch.sum(user_emb_v**2, dim=1) + torch.sum(pos_emb_v**2, dim=1) -\
+                          2.0*torch.sum(user_emb_v*pos_emb_v, dim=1)
+                    Ruj = torch.sum(user_emb_v**2, dim=1) + torch.sum(neg_emb_v**2, dim=1) -\
+                          2.0*torch.sum(user_emb_v*neg_emb_v, dim=1)
+
+                    loss = self.margin_ranking_loss(Rui, Ruj, margin=1)
                     model_optimizer.zero_grad()
                     loss.backward()
                     model_optimizer.step()
