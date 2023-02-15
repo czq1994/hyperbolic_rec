@@ -226,7 +226,7 @@ class Recommender(object):
             batch_user_index = user_indexes[start:end]
 
             pred_distance = self.model.predict(batch_user_index)
-            print("pred_distance", pred_distance.shape)
+            # print("pred_distance", pred_distance.shape)
             pred_distance = pred_distance.cpu().data.numpy().copy()
 
             # eliminate the training items in the prediction list
