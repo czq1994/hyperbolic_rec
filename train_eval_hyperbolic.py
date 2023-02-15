@@ -192,8 +192,8 @@ class Recommender(object):
         sampler = NegSampler(self.train_matrix, pre_samples, batch_size=batch_size, num_neg=n_neg, n_workers=4)
 
         lr, wd = self.config.learning_rate, self.config.weight_decay
-        # model_optimizer = torch.optim.Adam(self.model.myparameters, lr=lr, weight_decay=wd)
-        model_optimizer = RiemannianAdam(self.model.myparameters, lr=lr, weight_decay=wd)
+        model_optimizer = torch.optim.Adam(self.model.myparameters, lr=lr, weight_decay=wd)
+        # model_optimizer = RiemannianAdam(self.model.myparameters, lr=lr, weight_decay=wd)
 
         num_pairs = self.train_matrix.count_nonzero()
         num_batches = int(num_pairs / batch_size) + 1
