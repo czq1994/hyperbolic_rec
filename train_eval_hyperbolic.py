@@ -118,15 +118,15 @@ class Recommender(object):
         res = torch.where(res < torch.FloatTensor([0]).to(device), torch.FloatTensor([0]).to(device), res)
         return torch.sum(res)
 
-    def bpr_loss(self, pos_rating_vector, neg_rating_vector, margin=0):
-        loss = neg_rating_vector - pos_rating_vector + margin
-        loss = torch.sigmoid(loss)
-        loss = -torch.log(loss)
-        loss = torch.sum(loss)
-        return loss
+    # def bpr_loss(self, pos_rating_vector, neg_rating_vector, margin=0):
+    #     loss = neg_rating_vector - pos_rating_vector + margin
+    #     loss = torch.sigmoid(loss)
+    #     loss = -torch.log(loss)
+    #     loss = torch.sum(loss)
+    #     return loss
 
     def hyper_bolic_bpr_loss(self, pos_rating_vector, neg_rating_vector, margin=0):
-        loss = pos_rating_vector - neg_rating_vector + margin
+        loss = -pos_rating_vector + neg_rating_vector + margin
         loss = torch.sigmoid(loss)
         loss = -torch.log(loss)
         loss = torch.sum(loss)
@@ -206,6 +206,7 @@ class Recommender(object):
                 avg_cost = 0.
                 neg_time = 0
                 t1 = time.time()
+                curvature = 1.0
 
                 for batchID in range(num_batches):
                     #data preparation
@@ -226,17 +227,17 @@ class Recommender(object):
                     pos_emb_v = pos_emb.view(-1, self.config.hidden_dim)
                     neg_emb_v = neg_emb.view(-1, self.config.hidden_dim)
 
-                    print("user", user_emb_v[0:2])
-                    print("item", pos_emb_v[0:2])
+                    # print("user", user_emb_v[0:2])
+                    # print("item", pos_emb_v[0:2])
 
-                    curvature = 1.0
                     user_emb_hyper = self.project_to_hyperbolic(user_emb_v, curvature)
                     pos_emb_hyper = self.project_to_hyperbolic(pos_emb_v, curvature)
                     neg_emb_hyper = self.project_to_hyperbolic(neg_emb_v, curvature)
 
-                    Rui = self.sqdist(user_emb_hyper, pos_emb_hyper, 1)**0.5
-                    Ruj = self.sqdist(user_emb_hyper, neg_emb_hyper, 1)**0.5
-                    loss = self.hyper_bolic_bpr_loss(Rui, Ruj)
+                    Rui = self.sqdist(user_emb_hyper, pos_emb_hyper, curvature)
+                    Ruj = self.sqdist(user_emb_hyper, neg_emb_hyper, curvature)
+                    # loss = self.hyper_bolic_bpr_loss(Rui, Ruj)
+                    loss = self.margin_ranking_loss(Rui, Ruj, margin=0.5)
 
                     model_optimizer.zero_grad()
                     loss.backward()
