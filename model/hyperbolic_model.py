@@ -177,7 +177,7 @@ class Model(nn.Module):
         '''
         dist = torch.zeros(y.shape[0], 1).to(self.device)
         for i in range(x.shape[0]):
-            if i % 100 == 0:
+            if i % 1000 == 0:
                 print(i)
             cur_x = x[i:i+1].repeat(y.shape[0], 1)
             cur_dist = self.sqdist(cur_x, y, c)
