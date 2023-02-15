@@ -226,8 +226,8 @@ class Recommender(object):
                     pos_emb_v = pos_emb.view(-1, self.config.hidden_dim)
                     neg_emb_v = neg_emb.view(-1, self.config.hidden_dim)
 
-                    print(user_emb[0:2])
-                    print(pos_emb[0:2])
+                    print("user", user_emb_v[0:2])
+                    print("item", pos_emb_v[0:2])
 
                     curvature = 1.0
                     user_emb_hyper = self.project_to_hyperbolic(user_emb_v, curvature)
