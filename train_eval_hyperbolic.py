@@ -13,6 +13,7 @@ from eval_metrics import precision_at_k, recall_at_k, mapk, ndcg_k
 from sampler import NegSampler
 from model.hyperbolic_model import Model, Controller
 from utils.math_utils import arcosh, cosh, sinh
+# from rgd.rsgd import RiemannianSGD
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -244,7 +245,7 @@ class Recommender(object):
                 logger.debug("Avg loss:{}".format(avg_cost))
                 print("neg time is {}".format(neg_time))
                 print("all time is {}".format(time.time() - t1))
-                if t % 20 == 0 and t > 0:
+                if t % 20 == 0: #and t > 0:
                     sampler.close()
                     user_neg_items = self.neg_item_pre_sampling(self.train_matrix, num_neg_candidates=500)
                     pre_samples = {'user_neg_items': user_neg_items}
