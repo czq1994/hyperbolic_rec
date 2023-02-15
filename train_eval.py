@@ -82,7 +82,7 @@ class Recommender(object):
         return torch.sum(res)
 
     def bpr_loss(self, pos_rating_vector, neg_rating_vector, margin=0):
-        loss = neg_rating_vector - pos_rating_vector + margin
+        loss = pos_rating_vector - neg_rating_vector + margin
         loss = torch.sigmoid(loss)
         loss = -torch.log(loss)
         loss = torch.sum(loss)
@@ -169,8 +169,8 @@ class Recommender(object):
                     pos_emb_v = pos_emb.view(-1, self.config.hidden_dim)
                     neg_emb_v = neg_emb.view(-1, self.config.hidden_dim)
 
-                    Rui = torch.sum(user_emb_v*neg_emb_v, dim=1)
-                    Ruj = torch.sum(user_emb_v*pos_emb_v, dim=1)
+                    Rui = torch.sum(user_emb_v*pos_emb_v, dim=1)
+                    Ruj = torch.sum(user_emb_v*neg_emb_v, dim=1)
                     loss = self.bpr_loss(Rui, Ruj)
                     model_optimizer.zero_grad()
                     loss.backward()
