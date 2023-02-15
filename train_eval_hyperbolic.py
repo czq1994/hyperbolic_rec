@@ -237,7 +237,7 @@ class Recommender(object):
                     Rui = self.sqdist(user_emb_hyper, pos_emb_hyper, curvature)
                     Ruj = self.sqdist(user_emb_hyper, neg_emb_hyper, curvature)
                     # loss = self.hyper_bolic_bpr_loss(Rui, Ruj)
-                    loss = self.margin_ranking_loss(Rui, Ruj, margin=0.5)
+                    loss = self.margin_ranking_loss(Rui, Ruj, margin=1)
 
                     model_optimizer.zero_grad()
                     loss.backward()
@@ -249,7 +249,7 @@ class Recommender(object):
                 logger.debug("Avg loss:{}".format(avg_cost))
                 print("neg time is {}".format(neg_time))
                 print("all time is {}".format(time.time() - t1))
-                if t % 20 == 0 and t > 0:
+                if t % 50 == 0 and t > 0:
                     sampler.close()
                     user_neg_items = self.neg_item_pre_sampling(self.train_matrix, num_neg_candidates=500)
                     pre_samples = {'user_neg_items': user_neg_items}
