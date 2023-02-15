@@ -4,14 +4,15 @@ import time
 import logging
 import numpy as np
 from argparse import ArgumentParser
-
+from optimizers.radam import RiemannianAdam
 import torch
 import torch.backends.cudnn as cudnn
 from torch import autograd
 
 from eval_metrics import precision_at_k, recall_at_k, mapk, ndcg_k
 from sampler import NegSampler
-from model.model import Model, Controller
+from model.hyperbolic_model import Model, Controller
+from utils.math_utils import arcosh, cosh, sinh
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -22,7 +23,7 @@ def parse_args():
     parser.add_argument('-e', '--epoch', type=int, default=1000, help='number of epochs')
     parser.add_argument('-b', '--batch_size', type=int, default=5000, help='batch size for training')
     parser.add_argument('-dim', '--hidden_dim', type=int, default=50, help='the number of the hidden dimension')
-    parser.add_argument('-lr', '--learning_rate', type=float, default=1e-3, help='learning rate')
+    parser.add_argument('-lr', '--learning_rate', type=float, default=1e-2, help='learning rate')
     parser.add_argument('-wd', '--weight_decay', type=float, default=1e-3, help='weight decay')
     parser.add_argument('-n_neg', '--neg_samples', type=int, default=10, help='the number of negative samples')
     parser.add_argument('-dr', '--dropout_rate', type=float, default=0.5, help='the dropout probability')
@@ -44,6 +45,7 @@ def negsamp_vectorized_bsearch_preverif(pos_inds, n_items, n_samp=32):
     neg_inds = raw_samp + np.searchsorted(pos_inds_adj, raw_samp, side='right')
     return neg_inds
 
+
 def set_seed(seed):
     torch.cuda.manual_seed(seed)
     torch.manual_seed(seed)
@@ -51,11 +53,15 @@ def set_seed(seed):
     cudnn.deterministic = True
     cudnn.benchmark = False
 
+
 class Recommender(object):
     def __init__(self, data_set, config):
         assert data_set is not None, 'The data set is not valid.'
         set_seed(config.seed)
         train_set, train_matrix, test_set = data_set.generate_dataset(config.seed)
+        self.eps = {torch.float32: 1e-7, torch.float64: 1e-15}
+        self.min_norm = 1e-15
+        self.max_norm = 1e6
         self.train_set = train_set
         self.train_matrix = train_matrix
         self.test_set = test_set
@@ -64,6 +70,36 @@ class Recommender(object):
         self.item_id_shift = 0
         num_users, num_items = train_matrix.shape
         self.model = Model(num_users, num_items, config.hidden_dim, config.device).to(config.device)
+
+    def expmap0(self, u, c):
+        K = 1. / c
+        sqrtK = K ** 0.5
+        d = u.size(-1) - 1
+        x = u.narrow(-1, 1, d).view(-1, d)
+        x_norm = torch.norm(x, p=2, dim=1, keepdim=True)
+        x_norm = torch.clamp(x_norm, min=self.min_norm)
+        theta = x_norm / sqrtK
+        res = torch.ones_like(u)
+        res[:, 0:1] = sqrtK * cosh(theta)
+        res[:, 1:] = sqrtK * sinh(theta) * x / x_norm
+        return self.proj(res, c)
+
+    def proj_tan0(self, u, c):
+        narrowed = u.narrow(-1, 0, 1)
+        vals = torch.zeros_like(u)
+        vals[:, 0:1] = narrowed
+        return u - vals
+
+    def proj(self, x, c):
+        K = 1. / c
+        d = x.size(-1) - 1
+        y = x.narrow(-1, 1, d)
+        y_sqnorm = torch.norm(y, p=2, dim=1, keepdim=True) ** 2
+        mask = torch.ones_like(x)
+        mask[:, 0] = 0
+        vals = torch.zeros_like(x)
+        vals[:, 0:1] = torch.sqrt(torch.clamp(K + y_sqnorm, min=self.eps[x.dtype]))
+        return vals + mask * x
 
     def neg_item_pre_sampling(self, train_matrix, num_neg_candidates=500):
         num_users, num_items = train_matrix.shape
@@ -83,6 +119,13 @@ class Recommender(object):
 
     def bpr_loss(self, pos_rating_vector, neg_rating_vector, margin=0):
         loss = neg_rating_vector - pos_rating_vector + margin
+        loss = torch.sigmoid(loss)
+        loss = -torch.log(loss)
+        loss = torch.sum(loss)
+        return loss
+
+    def hyper_bolic_bpr_loss(self, pos_rating_vector, neg_rating_vector, margin=0):
+        loss = pos_rating_vector - neg_rating_vector + margin
         loss = torch.sigmoid(loss)
         loss = -torch.log(loss)
         loss = torch.sum(loss)
@@ -115,6 +158,27 @@ class Recommender(object):
         updated_grad = m_k_hat / (torch.sqrt(r_k_hat) + eps)
         return updated_grad
 
+    def minkowski_dot(self, x, y, keepdim=True):
+        res = torch.sum(x * y, dim=-1) - 2 * x[..., 0] * y[..., 0]
+        if keepdim:
+            res = res.view(res.shape + (1,))
+        return res
+
+    def sqdist(self, x, y, c):
+        K = 1. / c
+        prod = self.minkowski_dot(x, y)
+        theta = torch.clamp(-prod / K, min=1.0 + self.eps[x.dtype])
+        sqdist = K * arcosh(theta) ** 2
+        # clamp distance to avoid nans in Fermi-Dirac decoder
+        return torch.clamp(sqdist, max=50.0)
+
+    def project_to_hyperbolic(self, euclidean_emb, curvature):
+        o_item = torch.zeros_like(euclidean_emb).to(euclidean_emb.device)
+        item_eu_embeddings0 = torch.cat([o_item[:, 0:1], euclidean_emb], dim=1)
+        hyperbolic_emb = self.proj(self.expmap0(self.proj_tan0(
+            item_eu_embeddings0, curvature), c=curvature), c=curvature)
+        return hyperbolic_emb
+
     def train(self):
         # pre-sample a small set of negative samples
         t1 = time.time()
@@ -127,20 +191,12 @@ class Recommender(object):
         sampler = NegSampler(self.train_matrix, pre_samples, batch_size=batch_size, num_neg=n_neg, n_workers=4)
 
         lr, wd = self.config.learning_rate, self.config.weight_decay
-        model_optimizer = torch.optim.Adam(self.model.myparameters, lr=lr, weight_decay=wd)
+        # model_optimizer = torch.optim.Adam(self.model.myparameters, lr=lr, weight_decay=wd)
+        model_optimizer = RiemannianAdam(self.model.myparameters, lr=lr, weight_decay=wd)
 
         num_pairs = self.train_matrix.count_nonzero()
         num_batches = int(num_pairs / batch_size) + 1
 
-        # M_user = torch.zeros_like(self.model.user_mu_embeddings).type(torch.FloatTensor).to(self.config.device)
-        # R_user = torch.zeros_like(self.model.user_mu_embeddings).type(torch.FloatTensor).to(self.config.device)
-        # M_user.requires_grad = False
-        # R_user.requires_grad = False
-        #
-        # M_item = torch.zeros_like(self.model.item_mu_embeddings).type(torch.FloatTensor).to(self.config.device)
-        # R_item = torch.zeros_like(self.model.item_mu_embeddings).type(torch.FloatTensor).to(self.config.device)
-        # M_item.requires_grad = False
-        # R_item.requires_grad = False
         print("begin training")
         self.model.train()
         try:
@@ -169,9 +225,15 @@ class Recommender(object):
                     pos_emb_v = pos_emb.view(-1, self.config.hidden_dim)
                     neg_emb_v = neg_emb.view(-1, self.config.hidden_dim)
 
-                    Rui = torch.sum(user_emb_v*neg_emb_v, dim=1)
-                    Ruj = torch.sum(user_emb_v*pos_emb_v, dim=1)
-                    loss = self.bpr_loss(Rui, Ruj)
+                    curvature = 1.0
+                    user_emb_hyper = self.project_to_hyperbolic(user_emb_v, curvature)
+                    pos_emb_hyper = self.project_to_hyperbolic(pos_emb_v, curvature)
+                    neg_emb_hyper = self.project_to_hyperbolic(neg_emb_v, curvature)
+
+                    Rui = self.sqdist(user_emb_hyper, pos_emb_hyper, 1)**0.5
+                    Ruj = self.sqdist(user_emb_hyper, neg_emb_hyper, 1)**0.5
+                    loss = self.hyper_bolic_bpr_loss(Rui, Ruj)
+
                     model_optimizer.zero_grad()
                     loss.backward()
                     model_optimizer.step()
