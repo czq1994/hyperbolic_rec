@@ -70,6 +70,8 @@ class Recommender(object):
         self.user_id_shift = 0
         self.item_id_shift = 0
         num_users, num_items = train_matrix.shape
+        print("num_users", num_users)
+        print("num_items", num_items)
         self.model = Model(num_users, num_items, config.hidden_dim, config.device).to(config.device)
 
     def expmap0(self, u, c):
