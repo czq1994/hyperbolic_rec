@@ -25,7 +25,7 @@ def parse_args():
     parser.add_argument('-e', '--epoch', type=int, default=1001, help='number of epochs')
     parser.add_argument('-b', '--batch_size', type=int, default=5000, help='batch size for training')
     parser.add_argument('-dim', '--hidden_dim', type=int, default=50, help='the number of the hidden dimension')
-    parser.add_argument('-lr', '--learning_rate', type=float, default=1e-3, help='learning rate')
+    parser.add_argument('-lr', '--learning_rate', type=float, default=1e-2, help='learning rate')
     parser.add_argument('-wd', '--weight_decay', type=float, default=1e-3, help='weight decay')
     parser.add_argument('-n_neg', '--neg_samples', type=int, default=10, help='the number of negative samples')
     parser.add_argument('-dr', '--dropout_rate', type=float, default=0.5, help='the dropout probability')
@@ -198,7 +198,7 @@ class Recommender(object):
         lr, wd = self.config.learning_rate, self.config.weight_decay
         # model_optimizer = torch.optim.Adam(self.model.myparameters, lr=lr, weight_decay=wd)
         # model_optimizer = RiemannianAdam(self.model.myparameters, lr=lr, weight_decay=wd)
-        model_optimizer = RiemannianSGD(params=self.model.myparameters, lr=lr, weight_decay=wd, momentum=0.95)
+        model_optimizer = RiemannianSGD(params=self.model.myparameters, lr=lr, weight_decay=wd,)# momentum=0.95)
 
         num_pairs = self.train_matrix.count_nonzero()
         num_batches = int(num_pairs / batch_size) + 1

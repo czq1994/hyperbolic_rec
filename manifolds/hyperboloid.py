@@ -151,3 +151,19 @@ class Hyperboloid(Manifold):
         d = x.size(-1) - 1
         return sqrtK * x.narrow(-1, 1, d) / (x[:, 0:1] + sqrtK)
 
+    def egrad2rgrad(self, x, grad, k, dim=-1):
+        grad.narrow(-1, 0, 1).mul_(-1)
+        grad = grad.addcmul(self.inner(x, grad, dim=dim, keepdim=True), x / k)
+        return grad
+
+    def inner(self, u, v, keepdim: bool = False, dim: int = -1):
+        d = u.size(dim) - 1
+        uv = u * v
+        if keepdim is False:
+            return -uv.narrow(dim, 0, 1).sum(dim=dim, keepdim=False) + uv.narrow(
+                dim, 1, d
+            ).sum(dim=dim, keepdim=False)
+        else:
+            return torch.cat((-uv.narrow(dim, 0, 1), uv.narrow(dim, 1, d)), dim=dim).sum(
+                dim=dim, keepdim=True
+            )

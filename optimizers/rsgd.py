@@ -1,7 +1,7 @@
 import torch.optim
-from manifolds import ManifoldParameter, Hyperboloid1
+from manifolds import ManifoldParameter, Hyperboloid
 
-_default_manifold = Hyperboloid1()
+_default_manifold = Hyperboloid()
 
 
 def copy_or_set_(dest, source):
