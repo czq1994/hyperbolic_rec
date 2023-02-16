@@ -101,6 +101,7 @@ class RiemannianAdam(OptimMixin, torch.optim.Adam):
                         c = point.c
                     else:
                         manifold = _default_manifold
+                        print("not using hyperbolic!!")
                         c = None
                     if grad.is_sparse:
                         raise RuntimeError(

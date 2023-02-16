@@ -48,7 +48,7 @@ class Hyperboloid(Manifold):
         mask = torch.ones_like(x)
         mask[:, 0] = 0
         vals = torch.zeros_like(x)
-        vals[:, 0:1] = torch.sqrt(torch.clamp(K + y_sqnorm, min=self.eps[x.dtype]))
+        vals[:, 0:1] = torch.sqrt(torch.clamp(K + y_sqnorm, min=self.eps[x.dtype]))  # constraint of Lolentz metric
         return vals + mask * x
 
     def proj_tan(self, u, x, c):

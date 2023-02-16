@@ -179,7 +179,7 @@ class Recommender(object):
         # print("debug before", item_eu_embeddings0)
         item_eu_embeddings00 = self.proj_tan0(item_eu_embeddings0, curvature)
         # print("debug after", item_eu_embeddings0)
-        print("debug", item_eu_embeddings0.sum()==item_eu_embeddings00.sum())
+        # print("debug", item_eu_embeddings0.sum()==item_eu_embeddings00.sum())
         hyperbolic_emb = self.proj(self.expmap0(item_eu_embeddings00, c=curvature), c=curvature)
         return hyperbolic_emb
 
