@@ -3,7 +3,7 @@ import torch.optim
 from manifolds import Euclidean, ManifoldParameter, Hyperboloid
 
 # in order not to create it at each iteration
-_default_manifold = Euclidean()
+# _default_manifold = Euclidean()
 _default_manifold = Hyperboloid()
 
 
