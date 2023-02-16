@@ -21,10 +21,10 @@ logger = logging.getLogger(__name__)
 
 def parse_args():
     parser = ArgumentParser(description="Wass Rec")
-    parser.add_argument('-e', '--epoch', type=int, default=1000, help='number of epochs')
+    parser.add_argument('-e', '--epoch', type=int, default=1001, help='number of epochs')
     parser.add_argument('-b', '--batch_size', type=int, default=5000, help='batch size for training')
     parser.add_argument('-dim', '--hidden_dim', type=int, default=50, help='the number of the hidden dimension')
-    parser.add_argument('-lr', '--learning_rate', type=float, default=1e-3, help='learning rate')
+    parser.add_argument('-lr', '--learning_rate', type=float, default=1e-2, help='learning rate')
     parser.add_argument('-wd', '--weight_decay', type=float, default=1e-3, help='weight decay')
     parser.add_argument('-n_neg', '--neg_samples', type=int, default=10, help='the number of negative samples')
     parser.add_argument('-dr', '--dropout_rate', type=float, default=0.5, help='the dropout probability')
@@ -249,7 +249,7 @@ class Recommender(object):
                 logger.debug("Avg loss:{}".format(avg_cost))
                 print("neg time is {}".format(neg_time))
                 print("all time is {}".format(time.time() - t1))
-                if t % 250 == 0 and t > 0:
+                if t % 200 == 0 and t > 0:
                     sampler.close()
                     user_neg_items = self.neg_item_pre_sampling(self.train_matrix, num_neg_candidates=500)
                     pre_samples = {'user_neg_items': user_neg_items}
