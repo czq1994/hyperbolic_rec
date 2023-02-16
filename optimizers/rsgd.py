@@ -81,7 +81,7 @@ class RiemannianSGD(OptimMixin, torch.optim.SGD):
 
                 for point in group["params"]:
 
-                    print("debug point", point)
+                    print("debug point", point.shape)
 
                     if isinstance(point, ManifoldParameter):
                         manifold = point.manifold
