@@ -76,11 +76,22 @@ class Model(nn.Module):
 
         return pos_dist, neg_dist
 
+    # def project_to_hyperbolic(self, euclidean_emb, curvature):
+    #     o_item = torch.zeros_like(euclidean_emb).to(euclidean_emb.device)
+    #     item_eu_embeddings0 = torch.cat([o_item[:, 0:1], euclidean_emb], dim=1)
+    #     hyperbolic_emb = self.proj(self.expmap0(self.proj_tan0(
+    #         item_eu_embeddings0, curvature), c=curvature), c=curvature)
+    #     return hyperbolic_emb
+    #
+    #
     def project_to_hyperbolic(self, euclidean_emb, curvature):
         o_item = torch.zeros_like(euclidean_emb).to(euclidean_emb.device)
         item_eu_embeddings0 = torch.cat([o_item[:, 0:1], euclidean_emb], dim=1)
-        hyperbolic_emb = self.proj(self.expmap0(self.proj_tan0(
-            item_eu_embeddings0, curvature), c=curvature), c=curvature)
+        # print("debug before", item_eu_embeddings0)
+        # item_eu_embeddings00 = self.proj_tan0(item_eu_embeddings0, curvature)
+        # print("debug after", item_eu_embeddings0)
+        # print("debug", item_eu_embeddings0.sum()==item_eu_embeddings00.sum())
+        hyperbolic_emb = self.expmap0(item_eu_embeddings0, c=curvature)
         return hyperbolic_emb
 
     def predict(self, batch_user_ind):
