@@ -196,8 +196,8 @@ class Recommender(object):
 
         lr, wd = self.config.learning_rate, self.config.weight_decay
         # model_optimizer = torch.optim.Adam(self.model.myparameters, lr=lr, weight_decay=wd)
-        # model_optimizer = RiemannianAdam(self.model.myparameters, lr=lr, weight_decay=wd)
-        model_optimizer = RiemannianSGD(params=self.model.myparameters, lr=lr, weight_decay=wd, momentum=0.1)
+        model_optimizer = RiemannianAdam(self.model.myparameters, lr=lr, weight_decay=wd)
+        # model_optimizer = RiemannianSGD(params=self.model.myparameters, lr=lr, weight_decay=wd, momentum=0.1)
 
         num_pairs = self.train_matrix.count_nonzero()
         num_batches = int(num_pairs / batch_size) + 1
