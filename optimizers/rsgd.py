@@ -43,6 +43,7 @@ class OptimMixin(object):
 class RiemannianSGD(OptimMixin, torch.optim.SGD):
     r"""
     Riemannian Stochastic Gradient Descent with the same API as :class:`torch.optim.SGD`.
+
     Parameters
     ----------
     params : iterable
@@ -58,6 +59,7 @@ class RiemannianSGD(OptimMixin, torch.optim.SGD):
         dampening for momentum (default: 0)
     nesterov : bool (optional)
         enables Nesterov momentum (default: False)
+
     Other Parameters
     ----------------
     stabilize : int
@@ -81,15 +83,13 @@ class RiemannianSGD(OptimMixin, torch.optim.SGD):
 
                 for point in group["params"]:
 
-                    # print("debug point", point.shape)
-
                     if isinstance(point, ManifoldParameter):
                         manifold = point.manifold
                         c = point.c
                     else:
                         manifold = _default_manifold
                         c = 1.
-                    # print("manifold: ", manifold)
+
                     grad = point.grad
 
                     if grad is None:
