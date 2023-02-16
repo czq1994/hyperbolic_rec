@@ -177,10 +177,10 @@ class Recommender(object):
         o_item = torch.zeros_like(euclidean_emb).to(euclidean_emb.device)
         item_eu_embeddings0 = torch.cat([o_item[:, 0:1], euclidean_emb], dim=1)
         # print("debug before", item_eu_embeddings0)
-        item_eu_embeddings00 = self.proj_tan0(item_eu_embeddings0, curvature)
+        # item_eu_embeddings00 = self.proj_tan0(item_eu_embeddings0, curvature)
         # print("debug after", item_eu_embeddings0)
         # print("debug", item_eu_embeddings0.sum()==item_eu_embeddings00.sum())
-        hyperbolic_emb = self.proj(self.expmap0(item_eu_embeddings00, c=curvature), c=curvature)
+        hyperbolic_emb = self.expmap0(item_eu_embeddings0, c=curvature)
         return hyperbolic_emb
 
     def train(self):
