@@ -22,8 +22,8 @@ class Model(nn.Module):
         self.user_mu_embeddings.requires_grad = True
         self.item_mu_embeddings.requires_grad = True
 
-        self.user_mu_embeddings = torch.nn.init.normal_(self.user_mu_embeddings, 0, 0.01)
-        self.item_mu_embeddings = torch.nn.init.normal_(self.item_mu_embeddings, 0, 0.01)
+        self.user_mu_embeddings = torch.nn.init.normal_(self.user_mu_embeddings, 0, 0.1)
+        self.item_mu_embeddings = torch.nn.init.normal_(self.item_mu_embeddings, 0, 0.1)
 
         # project users and items to hyperboloid
         self.o_user = torch.zeros_like(self.user_mu_embeddings).to(self.device)
