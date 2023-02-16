@@ -241,7 +241,7 @@ class Recommender(object):
                     Rui = self.sqdist(user_emb_hyper, pos_emb_hyper, curvature)
                     Ruj = self.sqdist(user_emb_hyper, neg_emb_hyper, curvature)
                     # loss = self.hyper_bolic_bpr_loss(Rui, Ruj)
-                    loss = self.margin_ranking_loss(Rui, Ruj, margin=1)
+                    loss = self.margin_ranking_loss(Rui, Ruj, margin=3)
 
                     model_optimizer.zero_grad()
                     loss.backward()
