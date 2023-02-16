@@ -147,7 +147,7 @@ class Recommender(object):
         lr, wd = self.config.learning_rate, self.config.weight_decay
         # model_optimizer = torch.optim.Adam(self.model.myparameters, lr=lr, weight_decay=wd)
         # model_optimizer = RiemannianAdam(self.model.myparameters, lr=lr, weight_decay=wd)
-        model_optimizer = RiemannianSGD(params=self.model.myparameters, lr=lr, weight_decay=wd, momentum=0.95)
+        model_optimizer = RiemannianSGD(params=self.model.myparameters, lr=lr, weight_decay=wd, momentum=0.9)
 
         num_pairs = self.train_matrix.count_nonzero()
         num_batches = int(num_pairs / batch_size) + 1
@@ -184,7 +184,7 @@ class Recommender(object):
                     Rui = self.manifold.sqdist(user_emb_hyper, pos_emb_hyper, curvature)
                     Ruj = self.manifold.sqdist(user_emb_hyper, neg_emb_hyper, curvature)
                     # loss = self.hyper_bolic_bpr_loss(Rui, Ruj)
-                    loss = self.margin_ranking_loss(Rui, Ruj, margin=3)
+                    loss = self.margin_ranking_loss(Rui, Ruj, margin=1.)
 
                     model_optimizer.zero_grad()
                     loss.backward()
