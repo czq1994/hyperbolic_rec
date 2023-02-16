@@ -87,7 +87,7 @@ class RiemannianSGD(OptimMixin, torch.optim.SGD):
                     else:
                         manifold = _default_manifold
                         c = 1.
-
+                    # print("manifold: ", manifold)
                     grad = point.grad
 
                     if grad is None:
