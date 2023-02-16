@@ -179,7 +179,7 @@ class Recommender(object):
                     Ruj = torch.sum(user_emb_v**2, dim=1) + torch.sum(neg_emb_v**2, dim=1) -\
                           2.0*torch.sum(user_emb_v*neg_emb_v, dim=1)
 
-                    loss = self.margin_ranking_loss(Rui, Ruj, margin=1)
+                    loss = self.margin_ranking_loss(Rui, Ruj, margin=3)
                     model_optimizer.zero_grad()
                     loss.backward()
                     model_optimizer.step()
