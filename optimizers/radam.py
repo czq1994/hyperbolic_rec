@@ -102,8 +102,8 @@ class RiemannianAdam(OptimMixin, torch.optim.Adam):
                         c = point.c
                     else:
                         manifold = _default_manifold
-                        print("not using hyperbolic!!")
-                        c = None
+                        # print("not using hyperbolic!!")
+                        c = 1.
                     if grad.is_sparse:
                         raise RuntimeError(
                                 "Riemannian Adam does not support sparse gradients yet (PR is welcome)"
@@ -126,10 +126,12 @@ class RiemannianAdam(OptimMixin, torch.optim.Adam):
                     exp_avg_sq = state["exp_avg_sq"]
                     # actual step
                     grad.add_(weight_decay, point)
+                    # print("debug weight_decay", weight_decay)
+                    # print("debug point", point)
                     grad = manifold.egrad2rgrad(point, grad, c)
                     exp_avg.mul_(betas[0]).add_(1 - betas[0], grad)
                     exp_avg_sq.mul_(betas[1]).add_(
-                            1 - betas[1], manifold.inner(point, c, grad, keepdim=True)
+                            1 - betas[1], manifold.inner(point, grad, keepdim=True)
                     )
                     if amsgrad:
                         max_exp_avg_sq = state["max_exp_avg_sq"]
