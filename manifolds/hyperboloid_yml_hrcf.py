@@ -3,7 +3,7 @@ from manifolds.base import Manifold
 from utils.math_utils import arcosh, cosh, sinh
 
 
-class Hyperboloid1(Manifold):
+class Hyperboloid(Manifold):
     """
     Hyperboloid manifold class.
     We use the following convention: -x0^2 + x1^2 + ... + xd^2 = -K

@@ -5,6 +5,7 @@ import logging
 import numpy as np
 from argparse import ArgumentParser
 from optimizers.radam import RiemannianAdam
+from optimizers.rsgd import RiemannianSGD
 import torch
 import torch.backends.cudnn as cudnn
 from torch import autograd
@@ -196,7 +197,8 @@ class Recommender(object):
 
         lr, wd = self.config.learning_rate, self.config.weight_decay
         # model_optimizer = torch.optim.Adam(self.model.myparameters, lr=lr, weight_decay=wd)
-        model_optimizer = RiemannianAdam(self.model.myparameters, lr=lr, weight_decay=wd)
+        # model_optimizer = RiemannianAdam(self.model.myparameters, lr=lr, weight_decay=wd)
+        model_optimizer = RiemannianSGD(params=self.model.parameters(), lr=lr, weight_decay=wd, momentum=0.95)
 
         num_pairs = self.train_matrix.count_nonzero()
         num_batches = int(num_pairs / batch_size) + 1
