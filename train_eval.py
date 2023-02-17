@@ -65,6 +65,7 @@ class Recommender(object):
         self.item_id_shift = 0
         num_users, num_items = train_matrix.shape
         self.model = Model(num_users, num_items, config.hidden_dim, config.device).to(config.device)
+        print("margin", self.config.margin)
 
     def neg_item_pre_sampling(self, train_matrix, num_neg_candidates=500):
         num_users, num_items = train_matrix.shape
