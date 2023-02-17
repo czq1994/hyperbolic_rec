@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 def parse_args():
     parser = ArgumentParser(description="Wass Rec")
-    parser.add_argument('-e', '--epoch', type=int, default=1000, help='number of epochs')
+    parser.add_argument('-e', '--epoch', type=int, default=1001, help='number of epochs')
     parser.add_argument('-b', '--batch_size', type=int, default=5000, help='batch size for training')
     parser.add_argument('-dim', '--hidden_dim', type=int, default=50, help='the number of the hidden dimension')
     parser.add_argument('-lr', '--learning_rate', type=float, default=1e-3, help='learning rate')
@@ -30,7 +30,7 @@ def parse_args():
     parser.add_argument('--gpu_id', type=int, default=0)
     parser.add_argument('-seed', type=int, default=0, help='random state to split the data')
     parser.add_argument('--data', type=str, default='cds')
-    parser.add_argument('--is_logging', type=bool, default=False)
+    parser.add_argument('--is_logging', type=bool, default=True)
     return parser.parse_args()
 
 
@@ -179,7 +179,7 @@ class Recommender(object):
                     Ruj = torch.sum(user_emb_v**2, dim=1) + torch.sum(neg_emb_v**2, dim=1) -\
                           2.0*torch.sum(user_emb_v*neg_emb_v, dim=1)
 
-                    loss = self.margin_ranking_loss(Rui, Ruj, margin=3)
+                    loss = self.margin_ranking_loss(Rui, Ruj, margin=1)
                     model_optimizer.zero_grad()
                     loss.backward()
                     model_optimizer.step()
@@ -190,7 +190,7 @@ class Recommender(object):
                 logger.debug("Avg loss:{}".format(avg_cost))
                 print("neg time is {}".format(neg_time))
                 print("all time is {}".format(time.time() - t1))
-                if t % 50 == 0 and t > 0:
+                if t % 100 == 0 and t > 0:
                     sampler.close()
                     user_neg_items = self.neg_item_pre_sampling(self.train_matrix, num_neg_candidates=500)
                     pre_samples = {'user_neg_items': user_neg_items}
