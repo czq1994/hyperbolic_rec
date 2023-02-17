@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 def parse_args():
-    parser = ArgumentParser(description="Wass Rec")
+    parser = ArgumentParser(description="Hyper Rec")
     parser.add_argument('-e', '--epoch', type=int, default=1001, help='number of epochs')
     parser.add_argument('-b', '--batch_size', type=int, default=5000, help='batch size for training')
     parser.add_argument('-dim', '--hidden_dim', type=int, default=50, help='the number of the hidden dimension')
@@ -160,7 +160,7 @@ class Recommender(object):
                 avg_cost = 0.
                 neg_time = 0
                 t1 = time.time()
-                curvature = 1.0
+                # curvature = 1.0
 
                 for batchID in range(num_batches):
                     #data preparation
@@ -181,8 +181,8 @@ class Recommender(object):
                     # constraint
                     user_emb_hyper, pos_emb_hyper, neg_emb_hyper = self.model.forward(user_emb, pos_emb, neg_emb)
 
-                    Rui = self.manifold.sqdist(user_emb_hyper, pos_emb_hyper, curvature)
-                    Ruj = self.manifold.sqdist(user_emb_hyper, neg_emb_hyper, curvature)
+                    Rui = self.manifold.sqdist(user_emb_hyper, pos_emb_hyper, self.model.c)
+                    Ruj = self.manifold.sqdist(user_emb_hyper, neg_emb_hyper, self.model.c)
                     # loss = self.hyper_bolic_bpr_loss(Rui, Ruj)
                     loss = self.margin_ranking_loss(Rui, Ruj, margin=1.)
 
