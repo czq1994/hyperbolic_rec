@@ -56,6 +56,27 @@ class DataSet(object):
             test_set.append(test_sample)
         return train_set, test_set
 
+    def split_data_sequentially1(self, user_records, test_radio=0.2):
+        train_set = []
+        test_set = []
+
+        for user_id, item_list in enumerate(user_records):
+            len_list = len(item_list)
+            num_test_samples = int(math.ceil(len_list * test_radio))
+            train_sample = []
+            test_sample = []
+            for i in range(len_list - num_test_samples, len_list):
+                test_sample.append(item_list[i])
+
+            for place in item_list:
+                if place not in set(test_sample):
+                    train_sample.append(place)
+
+            train_set.append(train_sample)
+            test_set.append(test_sample)
+
+        return train_set, test_set
+
     def split_data_sequentially(self, user_records, test_radio=0.2):
         train_set = []
         test_set = []

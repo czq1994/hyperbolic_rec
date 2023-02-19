@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 def parse_args():
     parser = ArgumentParser(description="Wass Rec")
     parser.add_argument('-margin', '--margin', type=float, default=1.0, help='margin rate')
-    parser.add_argument('-e', '--epoch', type=int, default=1001, help='number of epochs')
+    parser.add_argument('-e', '--epoch', type=int, default=1, help='number of epochs')
     parser.add_argument('-b', '--batch_size', type=int, default=5000, help='batch size for training')
     parser.add_argument('-dim', '--hidden_dim', type=int, default=50, help='the number of the hidden dimension')
     parser.add_argument('-lr', '--learning_rate', type=float, default=1e-3, help='learning rate')
@@ -31,7 +31,7 @@ def parse_args():
     parser.add_argument('--gpu_id', type=int, default=0)
     parser.add_argument('-seed', type=int, default=0, help='random state to split the data')
     parser.add_argument('--data', type=str, default='cds')
-    parser.add_argument('--is_logging', type=bool, default=True)
+    parser.add_argument('--is_logging', type=bool, default=False)
     return parser.parse_args()
 
 
@@ -44,6 +44,7 @@ def negsamp_vectorized_bsearch_preverif(pos_inds, n_items, n_samp=32):
     pos_inds_adj = pos_inds - np.arange(len(pos_inds))
     neg_inds = raw_samp + np.searchsorted(pos_inds_adj, raw_samp, side='right')
     return neg_inds
+
 
 def set_seed(seed):
     torch.cuda.manual_seed(seed)
