@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 def parse_args():
     parser = ArgumentParser(description="Wass Rec")
     parser.add_argument('-margin', '--margin', type=float, default=1.0, help='margin rate')
-    parser.add_argument('-e', '--epoch', type=int, default=1, help='number of epochs')
+    parser.add_argument('-e', '--epoch', type=int, default=1001, help='number of epochs')
     parser.add_argument('-b', '--batch_size', type=int, default=5000, help='batch size for training')
     parser.add_argument('-dim', '--hidden_dim', type=int, default=50, help='the number of the hidden dimension')
     parser.add_argument('-lr', '--learning_rate', type=float, default=1e-3, help='learning rate')
