@@ -10,9 +10,9 @@ class ML20M(DataSet):
         self.item_mapping_file = 'ml20m_item_mapping.pkl'
         # self.item_pair_count_file = 'ml20m_3_neighbors.npz'
 
-        self.num_users = 129797
-        self.num_items = 13649
-        self.max_item_neighbors = 500
+        self.num_users = 138409
+        self.num_items = 13132
+        # self.max_item_neighbors = 500
 
         self.user_records = None
         self.user_mapping = None
@@ -30,6 +30,8 @@ class ML20M(DataSet):
         # for i in range(item_pair_count.shape[0]):
         #     item_neighbor_list.append(item_pair_count[i].indices)
         #     item_neighbor_counts.append(item_pair_count[i].data)
+        # print(len(user_mapping))
+        # print(len(item_mapping))
 
         assert self.num_users == len(user_mapping) and self.num_items == len(item_mapping)
 

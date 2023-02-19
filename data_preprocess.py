@@ -1,3 +1,4 @@
+## data from lightgcn  Amazon Books
 import pandas as pd
 import pickle
 
@@ -176,3 +177,12 @@ def data_partition_sort(fname, filter_core=20):
 
 
 user_records, usernum, itemnum, userset, itemset = data_partition_sort(path, filter_core=20)
+with open(r"C:\Users\ziqiancui2\PycharmProjects\hyperbolic_rec\data\dataset\MovieLens\ml20m\ml20m_item_sequences.pkl",
+          'wb') as fo:  # 将数据写入pkl文件
+    pickle.dump(user_records, fo)
+with open(r"C:\Users\ziqiancui2\PycharmProjects\hyperbolic_rec\data\dataset\MovieLens\ml20m\ml20m_user_mapping.pkl",
+          'wb') as fo:  # 将数据写入pkl文件
+    pickle.dump(userset, fo)
+with open(r"C:\Users\ziqiancui2\PycharmProjects\hyperbolic_rec\data\dataset\MovieLens\ml20m\ml20m_item_mapping.pkl",
+          'wb') as fo:  # 将数据写入pkl文件
+    pickle.dump(itemset, fo)

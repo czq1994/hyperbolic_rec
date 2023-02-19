@@ -30,7 +30,7 @@ def parse_args():
     parser.add_argument('--ac_fc', type=str, default='tanh')
     parser.add_argument('--gpu_id', type=int, default=0)
     parser.add_argument('-seed', type=int, default=0, help='random state to split the data')
-    parser.add_argument('--data', type=str, default='cds')
+    parser.add_argument('--data', type=str, default='ml20m')
     parser.add_argument('--is_logging', type=bool, default=False)
     return parser.parse_args()
 
