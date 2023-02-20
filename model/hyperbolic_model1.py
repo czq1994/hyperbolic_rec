@@ -65,13 +65,14 @@ class Model(nn.Module):
 
     def predict(self, batch_user_ind):
         batch_user_ind = torch.from_numpy(batch_user_ind).type(torch.LongTensor).to(self.device)
-        user_emb_v = self.user_hb_embeddings[batch_user_ind].view(-1, self.hidden_dim)
-        item_emb_v = self.item_hb_embeddings.view(-1, self.hidden_dim)
-        user_emb_hyper = self.manifold.proj(user_emb_v, self.c)  # b * (d+1)
-        item_emb_hyper = self.manifold.proj(item_emb_v, self.c)  # item_num * (d+1)
-        # print("user_emb_hyper", user_emb_hyper.shape)
-        # print("item_emb_hyper", item_emb_hyper.shape)
-        distance = self.hb_pairwise_distances(user_emb_hyper, item_emb_hyper, self.c)
+        with torch.no_grad():
+            user_emb_v = self.user_hb_embeddings[batch_user_ind].view(-1, self.hidden_dim)
+            item_emb_v = self.item_hb_embeddings.view(-1, self.hidden_dim)
+            user_emb_hyper = self.manifold.proj(user_emb_v, self.c)  # b * (d+1)
+            item_emb_hyper = self.manifold.proj(item_emb_v, self.c)  # item_num * (d+1)
+            # print("user_emb_hyper", user_emb_hyper.shape)
+            # print("item_emb_hyper", item_emb_hyper.shape)
+            distance = self.hb_pairwise_distances(user_emb_hyper, item_emb_hyper, self.c)
         # self.sqdist(user_emb_hyper, pos_emb_hyper, 1)
         # batchsize * 24634
         return distance
